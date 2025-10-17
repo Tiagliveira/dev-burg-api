@@ -1,6 +1,8 @@
-import * as Yup from 'yup';
-import User from '../models/User.js';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import * as Yup from 'yup';
+import authConfig from './../../config/auth.js';
+import User from '../models/User.js';
 
 class SessionController {
   async store(request, response) {
@@ -14,11 +16,11 @@ class SessionController {
       strict: true,
     });
 
-    const emailOrPasswordIcorrect = () =>{
-        return response
+    const emailOrPasswordIcorrect = () => {
+      return response
         .status(400)
         .json({ error: 'Email or password incorrect' });
-    }
+    };
 
     if (!isValid) {
       emailOrPasswordIcorrect();
@@ -33,7 +35,7 @@ class SessionController {
     });
 
     if (!existingUser) {
-     emailOrPasswordIcorrect();
+      emailOrPasswordIcorrect();
     }
 
     const ispasswordCorrect = await bcrypt.compare(
@@ -45,11 +47,16 @@ class SessionController {
       emailOrPasswordIcorrect();
     }
 
+    const token = jwt.sign({ id: existingUser.id }, authConfig.secret, {
+      expiresIn: authConfig.expiresin,
+    });
+
     return response.status(200).json({
       id: existingUser.id,
       name: existingUser.name,
       email: existingUser.email,
       admin: existingUser.admin,
+      token,
     });
   }
 }
