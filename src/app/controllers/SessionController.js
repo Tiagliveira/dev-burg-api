@@ -47,9 +47,13 @@ class SessionController {
       emailOrPasswordIcorrect();
     }
 
-    const token = jwt.sign({ id: existingUser.id }, authConfig.secret, {
-      expiresIn: authConfig.expiresin,
-    });
+    const token = jwt.sign(
+      { id: existingUser.id, admin: existingUser.admin },
+      authConfig.secret,
+      {
+        expiresIn: authConfig.expiresin,
+      },
+    );
 
     return response.status(200).json({
       id: existingUser.id,
