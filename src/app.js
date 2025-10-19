@@ -6,7 +6,9 @@ const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(routes);
 app.use('/product-file', fileRoutesConfig);
+app.use('/category-file', fileRoutesConfig);
+
+app.use(routes);
 
 export default app;
