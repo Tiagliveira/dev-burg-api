@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { Sequelize } from 'sequelize';
 import Category from '../app/models/Category.js';
 import Product from '../app/models/Product.js';
@@ -9,6 +10,7 @@ const models = [User, Product, Category];
 class Database {
   constructor() {
     this.init();
+    this.mongo();
   }
 
   init() {
@@ -18,6 +20,11 @@ class Database {
       .map(
         (model) => model.associate && model.associate(this.conection.models),
       );
+  }
+  mongo() {
+    this.mongooseConection = mongoose.connect(
+      'mongodb://localhost:27017/devburg',
+    );
   }
 }
 
