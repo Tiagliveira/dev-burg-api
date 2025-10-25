@@ -1,7 +1,7 @@
 module.exports = {
   dialect: 'postgres',
   host: 'localhost',
-  username: 'admin',
+  username: 'postgres',
   password: 'tigo7499',
   database: 'dev-burg-db',
   define: {
