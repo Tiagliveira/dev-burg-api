@@ -10,7 +10,6 @@ class CategoryController {
     try {
       schema.validateSync(request.body, { abortEarly: false });
     } catch (err) {
-      console.log(err);
       return response.status(400).json({ error: err.errors });
     }
 
@@ -40,7 +39,6 @@ class CategoryController {
     try {
       schema.validateSync(request.body, { abortEarly: false });
     } catch (err) {
-      console.log(err);
       return response.status(400).json({ error: err.errors });
     }
 
@@ -77,8 +75,6 @@ class CategoryController {
   }
   async index(_request, response) {
     const categories = await Category.findAll();
-
-    console.log(_request.userId);
 
     return response.status(200).json(categories);
   }
