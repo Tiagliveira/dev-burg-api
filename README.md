@@ -33,7 +33,7 @@ O front-end está sendo desenvolvido com React.js e será integrado em breve.
 
 ```bash
 # Clone o repositório
-git clone https://github.com/Tiagliveira/dev-burg-api
+git clone https://github.com/Tiagliveira/stack-burger-api
 
 # Acesse a pasta
 cd dev-burg-api
