@@ -1,4 +1,4 @@
-# 🍔 DevBurguer API
+# 🍔 Stack Burger API
 
 API desenvolvida para o sistema de pedidos de uma hamburgueria fictícia. Este backend gerencia usuários, autenticação, pedidos, produtos e painel administrativo. O projeto foi criado com foco em segurança, escalabilidade e boas práticas de arquitetura.
 
