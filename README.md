@@ -36,7 +36,7 @@ O front-end está sendo desenvolvido com React.js e será integrado em breve.
 git clone https://github.com/Tiagliveira/stack-burger-api
 
 # Acesse a pasta
-cd dev-burg-api
+cd stack-burger-api
 
 # Instale as dependências
 npm install
