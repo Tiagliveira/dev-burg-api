@@ -9,6 +9,8 @@ class ProductController {
       price: Yup.number().required(),
       category_id: Yup.number().required(),
       offer: Yup.boolean(),
+      description: Yup.TEXT().required(),
+      available: Yup.boolean(),
     });
 
     try {
@@ -17,7 +19,8 @@ class ProductController {
       return response.status(400).json({ error: err.errors });
     }
 
-    const { name, price, category_id, offer } = request.body;
+    const { name, price, category_id, offer, description, available } =
+      request.body;
     const { filename } = request.file;
 
     const newProduct = await Product.create({
@@ -26,6 +29,8 @@ class ProductController {
       category_id,
       path: filename,
       offer,
+      description,
+      available,
     });
 
     return response.status(201).json({ newProduct });
@@ -37,6 +42,8 @@ class ProductController {
       price: Yup.number(),
       category_id: Yup.number(),
       offer: Yup.boolean(),
+      description: Yup.text(),
+      available: Yup.boolean(),
     });
 
     try {
@@ -45,7 +52,8 @@ class ProductController {
       return response.status(400).json({ error: err.errors });
     }
 
-    const { name, price, category_id, offer } = request.body;
+    const { name, price, category_id, offer, description, available } =
+      request.body;
     const { id } = request.params;
 
     let path;
@@ -61,6 +69,8 @@ class ProductController {
         category_id,
         path,
         offer,
+        description,
+        available,
       },
       {
         where: {
@@ -74,6 +84,7 @@ class ProductController {
 
   async index(_request, response) {
     const products = await Product.findAll({
+      where: { available: true },
       include: {
         model: Category,
         as: 'category',
@@ -82,6 +93,21 @@ class ProductController {
     });
 
     return response.status(200).json(products);
+  }
+
+  async delete(request, response) {
+    const { id } = request.params;
+
+    const product = await Product.findByPk(id);
+    if (!product) {
+      return response.status(404).json({ error: 'Product not found' });
+    }
+
+    await product.update({ available: false });
+
+    return response
+      .status(200)
+      .json({ message: 'Produto desativado com sucesso!' });
   }
 }
 

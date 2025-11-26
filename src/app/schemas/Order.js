@@ -38,11 +38,25 @@ const OrderSchema = new mongoose.Schema(
           type: String,
           required: true,
         },
+        observation: {
+          type: String,
+        },
       },
     ],
     status: {
       type: String,
       required: true,
+    },
+    observation: {
+      type: String,
+    },
+    paymentMethod: {
+      type: String,
+      required: true,
+    },
+    paymentId: {
+      type: String,
+      required: false,
     },
   },
   {

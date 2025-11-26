@@ -31,6 +31,7 @@ routes.put(
   upload.single('file'),
   ProductController.update,
 );
+routes.delete('/products/:id', adminMiddleware, ProductController.delete);
 
 routes.post(
   '/categories',
@@ -47,8 +48,10 @@ routes.put(
 routes.get('/categories', CategoryController.index);
 
 routes.post('/orders', OrderController.store);
-routes.get('/orders', OrderController.index);
+routes.get('/orders', adminMiddleware, OrderController.index);
+routes.get('/orders/history', OrderController.show);
 routes.put('/orders/:id', adminMiddleware, OrderController.update);
+routes.put('orders/:id/cancel', OrderController.cancel);
 
 routes.post('/create_payment_intent', CreatePaymentIntentController.store);
 
