@@ -58,6 +58,26 @@ const OrderSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
+    isRated: {
+      type: Boolean,
+      default: false,
+    },
+    messages: [
+      {
+        userName: {
+          type: String,
+          required: true,
+        },
+        text: {
+          type: String,
+          required: true,
+        },
+        createdAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
   },
   {
     timestamps: true,

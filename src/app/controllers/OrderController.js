@@ -91,6 +91,8 @@ class OrderController {
 
     const newOrder = await Order.create(order);
 
+    request.io.emit('new_order', newOrder);
+
     return response.status(201).json(newOrder);
   }
 
@@ -118,6 +120,15 @@ class OrderController {
 
       if (!allowedStatus || !allowedStatus.includes(status)) {
         return response.status(400).json({ error: `Status inválido` });
+      }
+
+      if (status === 'DELIVERED' && order.status !== 'DELIVERED') {
+        for (const productData of order.products) {
+          await Product.increment('sold_count', {
+            by: productData.quantity,
+            where: { id: productData.id },
+          });
+        }
       }
 
       await Order.updateOne({ _id: id }, { status });
@@ -178,6 +189,98 @@ class OrderController {
       await Order.updateOne({ _id: id }, { status: 'CANCELED' });
 
       return response.json({ message: 'Pedido Cnacelado com sucesso.' });
+    } catch (err) {
+      return response.status(400).json({ error: err.message });
+    }
+  }
+
+  async addMessage(request, response) {
+    const schema = Yup.object({
+      text: Yup.string().required(),
+    });
+
+    try {
+      await schema.validateSync(request.body, { abortEarly: false });
+    } catch (err) {
+      return response.status(400).json({ error: err.errors });
+    }
+
+    const { id } = request.params;
+    const { text } = request.body;
+
+    const { userName } = request;
+
+    try {
+      const order = await Order.findById(id);
+
+      if (!order) {
+        return response.status(400).json({ error: 'Pedido não encontrado' });
+      }
+
+      const newMessage = {
+        userName,
+        text,
+        createdAt: new Date(),
+      };
+      order.messages.push(newMessage);
+
+      await order.save();
+
+      return response.json({
+        message: 'Mesnagem enviada',
+        chat: order.messages,
+      });
+    } catch (err) {
+      return response.status(400).json({ error: err.message });
+    }
+  }
+
+  async rateOrder(request, response) {
+    const { id } = request.params;
+    const { stars } = request.body;
+
+    if (stars < 1 || stars > 5) {
+      return response
+        .status(400)
+        .json({ error: 'A nota deve ser entre 1 e 5' });
+    }
+
+    try {
+      const order = await Order.findById(id);
+
+      if (!order) {
+        return response.status(400).json({ error: 'Pedido não encontrado' });
+      }
+
+      if (order.isRated) {
+        return response
+          .status(400)
+          .json({ error: 'Este pedido já foi avaliado.' });
+      }
+
+      const updatePromises = order.products.map(async (item) => {
+        const product = await Product.findByPk(item.id);
+
+        if (product) {
+          const currentCount = product.rating_count || 0;
+          const currentAvg = product.rating_average || 0;
+
+          const newCount = currentCount + 1;
+          const newAvg = (currentAvg * currentCount + stars) / newCount;
+
+          product.rating_count = newCount;
+          product.rating_average = newAvg;
+
+          await product.save();
+        }
+      });
+      await Promise.all(updatePromises);
+      order.isRated = true;
+      await order.save();
+
+      return response
+        .status(200)
+        .json({ message: 'Avliação enviada com sucesso!' });
     } catch (err) {
       return response.status(400).json({ error: err.message });
     }

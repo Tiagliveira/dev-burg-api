@@ -32,6 +32,7 @@ routes.put(
   ProductController.update,
 );
 routes.delete('/products/:id', adminMiddleware, ProductController.delete);
+routes.post('/products/:id/rate', ProductController.rate);
 
 routes.post(
   '/categories',
@@ -51,7 +52,9 @@ routes.post('/orders', OrderController.store);
 routes.get('/orders', adminMiddleware, OrderController.index);
 routes.get('/orders/history', OrderController.show);
 routes.put('/orders/:id', adminMiddleware, OrderController.update);
-routes.put('orders/:id/cancel', OrderController.cancel);
+routes.put('/orders/:id/cancel', OrderController.cancel);
+routes.post('/orders/:id/messages', OrderController.addMessage);
+routes.post('/orders/:id/rate', OrderController.rateOrder);
 
 routes.post('/create_payment_intent', CreatePaymentIntentController.store);
 

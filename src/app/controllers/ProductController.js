@@ -109,6 +109,40 @@ class ProductController {
       .status(200)
       .json({ message: 'Produto desativado com sucesso!' });
   }
+
+  async rate(request, response) {
+    const schema = Yup.object({
+      stars: Yup.number().min(1).max(5).required(),
+    });
+
+    try {
+      await schema.validateSync(request.body, { abortEarly: false });
+    } catch (err) {
+      return response.status(400).json({ error: err.errors });
+    }
+
+    const { id } = request.params;
+    const { stars } = request.body;
+
+    try {
+      const product = await Product.findByPk(id);
+
+      if (!product) {
+        return response.status(400).json({ error: 'Produto não encontardo' });
+      }
+
+      const newCount = currentCount + 1;
+      const newAvg = (currentAvg * currentCount + stars) / newCount;
+
+      product.rating_count = newCount;
+      product.rating_average = newAvg;
+
+      await product.save();
+      return response.json(product);
+    } catch (err) {
+      return response.status(400).json({ error: err.message });
+    }
+  }
 }
 
 export default new ProductController();

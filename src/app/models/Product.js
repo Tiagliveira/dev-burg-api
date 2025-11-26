@@ -10,6 +10,9 @@ class Product extends Model {
         offer: Sequelize.BOOLEAN,
         description: Sequelize.TEXT,
         available: Sequelize.BOOLEAN,
+        sold_count: Sequelize.INTEGER,
+        rating_average: Sequelize.FLOAT,
+        rating_count: Sequelize.INTEGER,
         url: {
           type: Sequelize.VIRTUAL,
           get() {
