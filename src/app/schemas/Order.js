@@ -62,6 +62,21 @@ const OrderSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    orderType: {
+      type: String,
+      required: true,
+      enum: ['delivery', 'takeout'],
+      default: 'delivery',
+    },
+    deliveryFee: {
+      type: Number,
+    },
+    deliveryCep: {
+      type: String,
+    },
+    addressNuber: {
+      type: String,
+    },
     messages: [
       {
         userName: {

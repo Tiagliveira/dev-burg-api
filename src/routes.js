@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import multer from 'multer';
 import CategoryController from './app/controllers/CategoryController.js';
+import DeliveryTaxController from './app/controllers/DeliveryTaxController.js';
 import OrderController from './app/controllers/OrderController.js';
 import ProductController from './app/controllers/ProductController.js';
 import SessionController from './app/controllers/SessionController.js';
@@ -57,5 +58,10 @@ routes.post('/orders/:id/messages', OrderController.addMessage);
 routes.post('/orders/:id/rate', OrderController.rateOrder);
 
 routes.post('/create_payment_intent', CreatePaymentIntentController.store);
+
+routes.post('/delivery-calculate', DeliveryTaxController.calculate);
+
+routes.post('/delivery_taxes', adminMiddleware, DeliveryTaxController.store);
+routes.get('/delivery-taxes', adminMiddleware, DeliveryTaxController.index);
 
 export default routes;

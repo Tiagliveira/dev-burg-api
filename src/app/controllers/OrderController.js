@@ -1,5 +1,7 @@
+import { Op } from 'sequelize';
 import * as Yup from 'yup';
 import Category from '../models/Category.js';
+import DeliveryTax from './../models/DeliveryTax.js';
 import Product from '../models/Product.js';
 import Order from '../schemas/Order.js';
 
@@ -17,6 +19,7 @@ class OrderController {
     const schema = Yup.object({
       observation: Yup.string(),
       paymentMethod: Yup.string().required(),
+      orderType: Yup.string().oneOf(['delivery', 'takeout']).required(),
       paymentId: Yup.string().when('paymentMethod', (paymentMethod, schema) => {
         return paymentMethod === 'card' ? schema.required() : schema;
       }),
@@ -30,6 +33,9 @@ class OrderController {
             observation: Yup.string(),
           }),
         ),
+      cep: Yup.string().when('orderType', (orderType, schema) => {
+        return orderType === 'delivery' ? schema.required() : schema;
+      }),
     });
 
     try {
@@ -44,7 +50,33 @@ class OrderController {
       observation: orderObservation,
       paymentId,
       paymentMethod,
+      orderType,
+      cep,
     } = request.body;
+
+    let deliveryFee = 0;
+    let finalCep = null;
+
+    if (orderType === 'delivery') {
+      const cepNuber = cep.replace(/\D/g, '');
+      finalCep = cep;
+
+      const taxRule = await DeliveryTax.findOne({
+        where: {
+          zip_code_start: { [Op.lte]: cepNuber },
+          zip_code_end: { [Op.gte]: cepNuber },
+        },
+      });
+
+      if (!taxRule) {
+        return response.status(400).json({
+          error:
+            'Ops! Esse endereço est fora da nossa de Entrega. Obrigado pela compreensão.',
+        });
+      }
+
+      deliveryFee = taxRule.price;
+    }
 
     const productId = products.map((product) => product.id);
 
@@ -87,6 +119,10 @@ class OrderController {
 
       paymentId,
       paymentMethod,
+
+      orderType,
+      deliveryCep: finalCep,
+      deliveryFee: deliveryFee,
     };
 
     const newOrder = await Order.create(order);
@@ -132,6 +168,11 @@ class OrderController {
       }
 
       await Order.updateOne({ _id: id }, { status });
+
+      request.io.to(id).emit('status_update', {
+        orderId: id,
+        newStatus: status,
+      });
     } catch (err) {
       return response.status(400).json({ error: err.message });
     }
@@ -225,6 +266,11 @@ class OrderController {
       order.messages.push(newMessage);
 
       await order.save();
+
+      request.io.to(id).emit('new-order_message', {
+        orderId: id,
+        message: newMessage,
+      });
 
       return response.json({
         message: 'Mesnagem enviada',
