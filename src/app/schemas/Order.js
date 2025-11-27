@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { number } from 'yup';
 
 const OrderSchema = new mongoose.Schema(
   {
@@ -71,11 +72,13 @@ const OrderSchema = new mongoose.Schema(
     deliveryFee: {
       type: Number,
     },
-    deliveryCep: {
-      type: String,
-    },
-    addressNuber: {
-      type: String,
+    address: {
+      cep: {type: String},
+      street: { type: String},
+      number: { type: String},
+      neighborhood: { type: String},
+      city: { type: String},
+      complement: { type: String},
     },
     messages: [
       {

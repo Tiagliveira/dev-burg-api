@@ -36,6 +36,19 @@ class OrderController {
       cep: Yup.string().when('orderType', (orderType, schema) => {
         return orderType === 'delivery' ? schema.required() : schema;
       }),
+      address: Yup.object().when('orderType', (orderType, schema) => {
+        if (orderType === 'takout') return schema;
+
+        return schema.shape({
+          cep: Yup.string().required(),
+          street: Yup.string().required(),
+          number: Yup.string().required(),
+          neighborhood: Yup.string().required(),
+          city: Yup.string().required(),
+          complement: Yup.string(),
+        })
+
+      })
     });
 
     try {
@@ -51,15 +64,13 @@ class OrderController {
       paymentId,
       paymentMethod,
       orderType,
-      cep,
+      address,
     } = request.body;
 
     let deliveryFee = 0;
-    let finalCep = null;
 
     if (orderType === 'delivery') {
-      const cepNuber = cep.replace(/\D/g, '');
-      finalCep = cep;
+      const cepNuber = address.cep.replace(/\D/g, '');
 
       const taxRule = await DeliveryTax.findOne({
         where: {
@@ -121,8 +132,8 @@ class OrderController {
       paymentMethod,
 
       orderType,
-      deliveryCep: finalCep,
-      deliveryFee: deliveryFee,
+      address,
+      deliveryFee,
     };
 
     const newOrder = await Order.create(order);
